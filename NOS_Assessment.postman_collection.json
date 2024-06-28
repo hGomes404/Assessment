@@ -1,0 +1,130 @@
+{
+	"info": {
+		"_postman_id": "ddf24aab-291d-4cbe-86c6-45bc93699ac1",
+		"name": "NOS_Assessment",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "36523172"
+	},
+	"item": [
+		{
+			"name": "https://gorest.co.in/public/v2/todos",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Schema para validar se a response corresponde ao pretendido\r",
+							"var schema = {\r",
+							"    \"type\": \"array\",\r",
+							"    \"response\": {\r",
+							"        \"properties\": {\r",
+							"        \"id\": {\r",
+							"            \"type\": \"integer\"\r",
+							"        },\r",
+							"        \"user_id\": {\r",
+							"            \"type\": \"integer\"\r",
+							"        },\r",
+							"        \"title\": {\r",
+							"            \"type\": \"string\"\r",
+							"        },\r",
+							"        \"due_on\": {\r",
+							"            \"type\": \"string\"\r",
+							"        },\r",
+							"        \"status\": {\r",
+							"            \"type\": \"string\"\r",
+							"        },\r",
+							"    }\r",
+							"    },\r",
+							"    \"required\": [\r",
+							"            \"id\",\r",
+							"            \"user_id\",\r",
+							"            \"title\",\r",
+							"            \"due_on\",\r",
+							"            \"status\"\r",
+							"    ]\r",
+							"};\r",
+							"\r",
+							"//Validar a response consoante o shcema apresentado\r",
+							"pm.test('Schema validation', () => {\r",
+							"  pm.response.to.have.jsonSchema (schema);\r",
+							"});\r",
+							"\r",
+							"//Get para o resultado da response\r",
+							"var data = pm.response.json();\r",
+							"\r",
+							"//Validação para ver se todos os users têm o status como completed, o teste passa apenas se os status estiverem 100% completed\r",
+							"pm.test('All status are completed', function() {\r",
+							"     var countPass = 0;\r",
+							"     var countFail = 0;\r",
+							"     for(var i = 0; i < data.length; i++){\r",
+							"        if(data[i].status === \"completed\"){\r",
+							"            countPass++;\r",
+							"        }\r",
+							"        else{\r",
+							"            countFail++;\r",
+							"        }\r",
+							"     }\r",
+							"    console.log('Status as completed: ' + countPass + ' Other status: ' + countFail);\r",
+							"    pm.expect(data.length).to.eql(countPass);\r",
+							" });\r",
+							"\r",
+							"//Validação para a data due_on, a interpretação deverá ser feito no sentido de se a data ainda não foi ultrapassada está tudo bem, assuma-se que o teste passa, caso o inverso aconteça e a data seja ultrapassada o teste falha, significando que se tem de resolver a situação (ex: pagamento em atraso)\r",
+							" pm.test('Billing date not overdue', function(){\r",
+							"    var dateNow = new Date().toISOString().split('T')[0];\r",
+							"    var dateYear = dateNow[0];\r",
+							"    var dateMonth = dateNow[1];\r",
+							"    var dateDay = dateNow[2];\r",
+							"     for(var i = 0; i < data.length; i++){\r",
+							"        var getBillingDateUsers = data[i].due_on.split('T')[0];\r",
+							"        var billingDateYear = getBillingDateUsers[0];\r",
+							"        var billingDateMonth = getBillingDateUsers[1];\r",
+							"        var billingDateDay = getBillingDateUsers[2];\r",
+							"        if(dateYear <= billingDateYear && dateMonth <= billingDateMonth && dateDay <= billingDateDay){\r",
+							"            pm.expect(dateYear).to.eql(billingDateYear);\r",
+							"            pm.expect(dateMonth).to.eql(billingDateMonth);\r",
+							"            pm.expect(dateDay).to.eql(billingDateDay);\r",
+							"        }\r",
+							"        else{\r",
+							"            pm.expect.fail(\"Billing is now overdue\");\r",
+							"        }\r",
+							"     }\r",
+							" });\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://gorest.co.in/public/v2/todos",
+					"protocol": "https",
+					"host": [
+						"gorest",
+						"co",
+						"in"
+					],
+					"path": [
+						"public",
+						"v2",
+						"todos"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
